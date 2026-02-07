@@ -8,6 +8,7 @@ struct SidebarView: View {
     @Binding var selectedPath: String?
 
     @State private var expandedIDs: Set<UUID> = []
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         ScrollView {
@@ -28,6 +29,19 @@ struct SidebarView: View {
                 }
             }
             .padding(.vertical, 4)
+        }
+        .focusable()
+        .focused($isFocused)
+        .onKeyPress(.upArrow) {
+            navigateUp()
+            return .handled
+        }
+        .onKeyPress(.downArrow) {
+            navigateDown()
+            return .handled
+        }
+        .onAppear {
+            isFocused = true
         }
     }
 
@@ -55,6 +69,46 @@ struct SidebarView: View {
             expandedIDs.remove(node.id)
         } else {
             expandedIDs.insert(node.id)
+        }
+    }
+
+    private func navigateUp() {
+        let rows = visibleRows
+        guard !rows.isEmpty else { return }
+
+        // Find current selection index
+        if let currentIndex = rows.firstIndex(where: { $0.node.path != nil && $0.node.path == selectedPath }) {
+            // Move to previous row if possible
+            if currentIndex > 0 {
+                if let path = rows[currentIndex - 1].node.path {
+                    selectedPath = path
+                }
+            }
+        } else {
+            // No selection, select first item with a path
+            if let firstWithPath = rows.first(where: { $0.node.path != nil }) {
+                selectedPath = firstWithPath.node.path
+            }
+        }
+    }
+
+    private func navigateDown() {
+        let rows = visibleRows
+        guard !rows.isEmpty else { return }
+
+        // Find current selection index
+        if let currentIndex = rows.firstIndex(where: { $0.node.path != nil && $0.node.path == selectedPath }) {
+            // Move to next row if possible
+            if currentIndex < rows.count - 1 {
+                if let path = rows[currentIndex + 1].node.path {
+                    selectedPath = path
+                }
+            }
+        } else {
+            // No selection, select first item with a path
+            if let firstWithPath = rows.first(where: { $0.node.path != nil }) {
+                selectedPath = firstWithPath.node.path
+            }
         }
     }
 }
