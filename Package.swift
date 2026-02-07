@@ -10,10 +10,19 @@ let package = Package(
     targets: [
         .target(
             name: "CHMLib",
-            path: "Sources/CHMLib",
-            publicHeadersPath: "include",
+            path: "Sources/CHMLib/src",
+            exclude: [
+                "chm_http.c",
+                "enum_chmLib.c",
+                "enumdir_chmLib.c",
+                "extract_chmLib.c",
+                "test_chmLib.c",
+                "Makefile.am",
+                "Makefile.simple"
+            ],
+            publicHeadersPath: ".",
             cSettings: [
-                .headerSearchPath("include")
+                .headerSearchPath(".")
             ]
         ),
         .target(
