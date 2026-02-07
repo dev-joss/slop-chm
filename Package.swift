@@ -22,7 +22,8 @@ let package = Package(
             ],
             publicHeadersPath: ".",
             cSettings: [
-                .headerSearchPath(".")
+                .headerSearchPath("."),
+                .unsafeFlags(["-fmodule-map-file=\(Context.packageDirectory)/Sources/CHMLib-modulemap"])
             ]
         ),
         .target(

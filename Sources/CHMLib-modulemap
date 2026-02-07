@@ -1,0 +1,5 @@
+module CHMLib {
+    header "CHMLib/src/chm_lib.h"
+    header "CHMLib/src/lzx.h"
+    export *
+}
