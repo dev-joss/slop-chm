@@ -40,6 +40,14 @@ struct SidebarView: View {
             navigateDown()
             return .handled
         }
+        .onKeyPress(.leftArrow) {
+            navigateLeft()
+            return .handled
+        }
+        .onKeyPress(.rightArrow) {
+            navigateRight()
+            return .handled
+        }
         .onAppear {
             isFocused = true
         }
@@ -109,6 +117,58 @@ struct SidebarView: View {
             if let firstWithPath = rows.first(where: { $0.node.path != nil }) {
                 selectedPath = firstWithPath.node.path
             }
+        }
+    }
+
+    private func navigateLeft() {
+        let rows = visibleRows
+        guard !rows.isEmpty else { return }
+
+        // Find current selection
+        guard let currentIndex = rows.firstIndex(where: { $0.node.path != nil && $0.node.path == selectedPath }) else { return }
+        let currentRow = rows[currentIndex]
+
+        // If current item has children and is expanded, collapse it
+        if !currentRow.node.children.isEmpty && expandedIDs.contains(currentRow.node.id) {
+            expandedIDs.remove(currentRow.node.id)
+        } else {
+            // Navigate to parent
+            // Find parent by searching backwards for a row with depth one less
+            let targetDepth = currentRow.depth - 1
+            if targetDepth >= 0 {
+                for i in stride(from: currentIndex - 1, through: 0, by: -1) {
+                    if rows[i].depth == targetDepth {
+                        if let path = rows[i].node.path {
+                            selectedPath = path
+                        }
+                        break
+                    }
+                }
+            }
+        }
+    }
+
+    private func navigateRight() {
+        let rows = visibleRows
+        guard !rows.isEmpty else { return }
+
+        // Find current selection
+        guard let currentIndex = rows.firstIndex(where: { $0.node.path != nil && $0.node.path == selectedPath }) else { return }
+        let currentRow = rows[currentIndex]
+
+        // Only act if current item has children
+        guard !currentRow.node.children.isEmpty else { return }
+
+        if expandedIDs.contains(currentRow.node.id) {
+            // Already expanded, move to first child
+            if currentIndex + 1 < rows.count && rows[currentIndex + 1].depth > currentRow.depth {
+                if let path = rows[currentIndex + 1].node.path {
+                    selectedPath = path
+                }
+            }
+        } else {
+            // Not expanded, expand it
+            expandedIDs.insert(currentRow.node.id)
         }
     }
 }
