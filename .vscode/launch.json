@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:slop-chm}",
+            "name": "Debug slop-chm",
+            "target": "slop-chm",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug slop-chm"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:slop-chm}",
+            "name": "Release slop-chm",
+            "target": "slop-chm",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release slop-chm"
+        }
+    ]
+}
