@@ -60,68 +60,6 @@ struct TOCParserTests {
     }
 }
 
-@Suite("Real CHM File Tests")
-struct RealCHMTests {
-    static let testFile = URL(fileURLWithPath: "/Users/jgray/src/nvapi/docs/NVAPI_Reference_OpenSource.chm")
-
-    @Test("Opens and enumerates real CHM")
-    func openReal() throws {
-        let file = try CHMFile(url: Self.testFile)
-        let entries = file.enumerateEntries()
-        print("Total entries: \(entries.count)")
-        let htmlEntries = entries.filter { $0.isHTML }
-        print("HTML entries: \(htmlEntries.count)")
-        for e in htmlEntries.prefix(5) {
-            print("  path=\(e.path) len=\(e.length)")
-        }
-        #expect(!entries.isEmpty)
-    }
-
-    @Test("Parses TOC from real CHM")
-    func parseTOC() throws {
-        let file = try CHMFile(url: Self.testFile)
-        if let hhcPath = file.findHHCPath() {
-            print("HHC path: \(hhcPath)")
-            let data = try file.extractData(path: hhcPath)
-            print("HHC data size: \(data.count)")
-            let nodes = try TOCParser.parse(data: data)
-            print("TOC root nodes: \(nodes.count)")
-            func dump(_ nodes: [TOCNode], indent: Int = 0) {
-                for n in nodes.prefix(3) {
-                    let pad = String(repeating: "  ", count: indent)
-                    print("\(pad)title=\"\(n.title)\" path=\(n.path ?? "nil") children=\(n.children.count)")
-                    dump(n.children, indent: indent + 1)
-                }
-            }
-            dump(nodes)
-            #expect(!nodes.isEmpty)
-        } else {
-            print("No HHC found")
-        }
-    }
-
-    @Test("Extracts HTML content")
-    func extractContent() throws {
-        let file = try CHMFile(url: Self.testFile)
-        if let page = file.findDefaultPage() {
-            print("Default page: \(page)")
-            let data = try file.extractData(path: page)
-            print("Page size: \(data.count) bytes")
-            #expect(data.count > 0)
-        } else {
-            print("No default page")
-            // Try first HTML entry
-            let entries = file.enumerateEntries()
-            if let first = entries.first(where: { $0.isHTML }) {
-                print("First HTML: \(first.path)")
-                let data = try file.extractData(for: first)
-                print("Size: \(data.count)")
-                #expect(data.count > 0)
-            }
-        }
-    }
-}
-
 @Suite("CHMEntry Tests")
 struct CHMEntryTests {
 
