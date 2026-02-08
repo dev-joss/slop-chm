@@ -8,11 +8,20 @@ struct ContentView: View {
     @State private var viewModel: CHMViewModel?
     @State private var errorMessage: String?
     @State private var loadedURL: URL?
+    @State private var isLoading = false
 
     var body: some View {
         Group {
             if let vm = viewModel {
                 MainContentView(viewModel: vm)
+            } else if isLoading {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .controlSize(.large)
+                    Text("Opening CHM file…")
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let error = errorMessage {
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.triangle")
@@ -48,13 +57,19 @@ struct ContentView: View {
     private func loadFile() {
         guard let url = fileURL, url != loadedURL else { return }
         loadedURL = url
-        do {
-            let chmFile = try CHMFile(url: url)
-            viewModel = CHMViewModel(chmFile: chmFile)
-            errorMessage = nil
-        } catch {
-            viewModel = nil
-            errorMessage = error.localizedDescription
+        viewModel = nil
+        errorMessage = nil
+        isLoading = true
+        Task {
+            do {
+                let chmFile = try await Task.detached {
+                    try CHMFile(url: url)
+                }.value
+                viewModel = CHMViewModel(chmFile: chmFile)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
         }
     }
 }
