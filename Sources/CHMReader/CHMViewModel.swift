@@ -86,9 +86,9 @@ final class CHMViewModel {
         searchTask = Task {
             // Debounce
             try? await Task.sleep(for: .milliseconds(200))
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else { isSearching = false; return }
             let results = await searchIndex.search(query: query)
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else { isSearching = false; return }
             // Back on @MainActor after await — no manual hop needed
             searchResults = results
             isSearching = false
