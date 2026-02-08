@@ -7,16 +7,18 @@ struct SearchView: View {
     @Binding var selectedPath: String?
 
     var body: some View {
-        List(results, selection: $selectedPath) { result in
-            VStack(alignment: .leading, spacing: 2) {
-                Text(result.title)
-                    .fontWeight(.medium)
-                Text(result.snippet)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+        List(selection: $selectedPath) {
+            ForEach(results) { result in
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(result.title)
+                        .fontWeight(.medium)
+                    Text(result.snippet)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+                .tag(result.path)
             }
-            .tag(result.path)
         }
     }
 }
