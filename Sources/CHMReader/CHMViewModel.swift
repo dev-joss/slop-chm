@@ -1,7 +1,7 @@
 import Foundation
 import CHMKit
 
-@Observable
+@MainActor @Observable
 final class CHMViewModel {
     var tocNodes: [TOCNode] = []
     var selectedPath: String?
@@ -62,11 +62,12 @@ final class CHMViewModel {
     // MARK: - Search
 
     private func buildSearchIndex() {
+        let url = chmFile.url
         Task {
-            await searchIndex.build(from: chmFile)
-            await MainActor.run {
-                isIndexBuilt = true
-            }
+            // Task inherits @MainActor; the await hops to the actor's executor
+            try? await searchIndex.build(from: url)
+            // Back on @MainActor after await
+            isIndexBuilt = true
         }
     }
 
@@ -85,10 +86,9 @@ final class CHMViewModel {
             guard !Task.isCancelled else { return }
             let results = await searchIndex.search(query: query)
             guard !Task.isCancelled else { return }
-            await MainActor.run {
-                searchResults = results
-                isSearching = false
-            }
+            // Back on @MainActor after await — no manual hop needed
+            searchResults = results
+            isSearching = false
         }
     }
 }

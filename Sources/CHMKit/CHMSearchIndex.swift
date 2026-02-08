@@ -22,8 +22,9 @@ public actor CHMSearchIndex {
 
     public init() {}
 
-    /// Build the index from all HTML entries in the CHM file.
-    public func build(from chmFile: CHMFile) {
+    /// Build the index by opening its own CHMFile handle (avoids sharing the C pointer).
+    public func build(from url: URL) throws {
+        let chmFile = try CHMFile(url: url)
         let entries = chmFile.enumerateEntries(
             flags: CHM_ENUMERATE_NORMAL | CHM_ENUMERATE_FILES
         )

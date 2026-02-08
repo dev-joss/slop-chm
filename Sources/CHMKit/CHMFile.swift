@@ -2,6 +2,8 @@ import Foundation
 import CHMLib
 
 /// Swift wrapper around a CHMLib `chmFile*`.
+/// `@unchecked Sendable`: the underlying C handle is NOT thread-safe.
+/// Each instance must only be accessed from one concurrency domain at a time.
 public final class CHMFile: @unchecked Sendable {
     private let handle: OpaquePointer
     public let url: URL
