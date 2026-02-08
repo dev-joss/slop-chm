@@ -3,7 +3,7 @@ import WebKit
 import CHMKit
 
 /// A wrapper holding the WKWebView so it can be shared between SwiftUI and imperative code.
-@Observable
+@MainActor @Observable
 final class WebViewStore {
     var webView: WKWebView?
     private var schemeHandler: CHMURLSchemeHandler?
