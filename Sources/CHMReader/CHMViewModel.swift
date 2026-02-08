@@ -65,9 +65,12 @@ final class CHMViewModel {
         let url = chmFile.url
         Task {
             // Task inherits @MainActor; the await hops to the actor's executor
-            try? await searchIndex.build(from: url)
-            // Back on @MainActor after await
-            isIndexBuilt = true
+            do {
+                try await searchIndex.build(from: url)
+                isIndexBuilt = true
+            } catch {
+                // Index stays not-built; search will remain unavailable
+            }
         }
     }
 
