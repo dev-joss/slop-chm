@@ -149,7 +149,6 @@ extension CHMEntry {
         }
         self.init(
             path: path,
-            offset: ui.start,
             length: Int64(ui.length),
             space: Int32(ui.space)
         )

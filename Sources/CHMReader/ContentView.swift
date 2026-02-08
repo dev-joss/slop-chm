@@ -122,13 +122,3 @@ struct MainContentView: View {
         }
     }
 }
-
-extension NSView {
-    func findSubview<T: NSView>(ofType type: T.Type) -> T? {
-        if let match = self as? T { return match }
-        for sub in subviews {
-            if let found = sub.findSubview(ofType: type) { return found }
-        }
-        return nil
-    }
-}

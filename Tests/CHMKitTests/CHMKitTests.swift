@@ -65,9 +65,9 @@ struct CHMEntryTests {
 
     @Test("isHTML detection")
     func htmlDetection() {
-        let htm = CHMEntry(path: "/page.htm", offset: 0, length: 100, space: 0)
-        let html = CHMEntry(path: "/page.HTML", offset: 0, length: 100, space: 0)
-        let css = CHMEntry(path: "/style.css", offset: 0, length: 50, space: 0)
+        let htm = CHMEntry(path: "/page.htm", length: 100, space: 0)
+        let html = CHMEntry(path: "/page.HTML", length: 100, space: 0)
+        let css = CHMEntry(path: "/style.css", length: 50, space: 0)
 
         #expect(htm.isHTML)
         #expect(html.isHTML)
@@ -76,7 +76,7 @@ struct CHMEntryTests {
 
     @Test("filename extraction")
     func filename() {
-        let entry = CHMEntry(path: "/docs/guide/intro.htm", offset: 0, length: 100, space: 0)
+        let entry = CHMEntry(path: "/docs/guide/intro.htm", length: 100, space: 0)
         #expect(entry.filename == "intro.htm")
     }
 }

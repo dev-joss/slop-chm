@@ -12,11 +12,6 @@ public struct TOCNode: Identifiable, Hashable {
         self.path = path
         self.children = children
     }
-
-    /// Used by SwiftUI List(children:) — returns nil when empty.
-    public var optionalChildren: [TOCNode]? {
-        children.isEmpty ? nil : children
-    }
 }
 
 /// State-machine parser for .hhc files (malformed HTML).
