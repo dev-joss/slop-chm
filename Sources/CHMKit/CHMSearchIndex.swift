@@ -87,42 +87,39 @@ public actor CHMSearchIndex {
             .filter { $0.count >= 2 }
     }
 
+    // Pre-compiled regexes — avoids recreating per call during indexing
+    private static let scriptStyleRegex = try! NSRegularExpression(
+        pattern: #"<(script|style)[^>]*>[\s\S]*?</\1>"#, options: .caseInsensitive
+    )
+    private static let tagRegex = try! NSRegularExpression(pattern: #"<[^>]+>"#)
+    private static let whitespaceRegex = try! NSRegularExpression(pattern: #"\s+"#)
+    private static let titleRegex = try! NSRegularExpression(
+        pattern: #"<title[^>]*>(.*?)</title>"#, options: .caseInsensitive
+    )
+
     private func stripHTML(_ html: String) -> String {
         var result = html
-        // Remove script/style blocks
-        let blockPattern = #"<(script|style)[^>]*>[\s\S]*?</\1>"#
-        if let regex = try? NSRegularExpression(pattern: blockPattern, options: .caseInsensitive) {
-            result = regex.stringByReplacingMatches(
-                in: result, range: NSRange(result.startIndex..., in: result), withTemplate: " "
-            )
-        }
-        // Remove tags
-        let tagPattern = #"<[^>]+>"#
-        if let regex = try? NSRegularExpression(pattern: tagPattern) {
-            result = regex.stringByReplacingMatches(
-                in: result, range: NSRange(result.startIndex..., in: result), withTemplate: " "
-            )
-        }
-        // Decode entities
+        let fullRange = { (s: String) in NSRange(s.startIndex..., in: s) }
+        result = Self.scriptStyleRegex.stringByReplacingMatches(
+            in: result, range: fullRange(result), withTemplate: " "
+        )
+        result = Self.tagRegex.stringByReplacingMatches(
+            in: result, range: fullRange(result), withTemplate: " "
+        )
         result = result
             .replacingOccurrences(of: "&nbsp;", with: " ")
             .replacingOccurrences(of: "&amp;", with: "&")
             .replacingOccurrences(of: "&lt;", with: "<")
             .replacingOccurrences(of: "&gt;", with: ">")
             .replacingOccurrences(of: "&quot;", with: "\"")
-        // Collapse whitespace
-        if let regex = try? NSRegularExpression(pattern: #"\s+"#) {
-            result = regex.stringByReplacingMatches(
-                in: result, range: NSRange(result.startIndex..., in: result), withTemplate: " "
-            )
-        }
+        result = Self.whitespaceRegex.stringByReplacingMatches(
+            in: result, range: fullRange(result), withTemplate: " "
+        )
         return result.trimmingCharacters(in: .whitespaces)
     }
 
     private func extractTitle(from html: String) -> String? {
-        let pattern = #"<title[^>]*>(.*?)</title>"#
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-              let match = regex.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
+        guard let match = Self.titleRegex.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
               let range = Range(match.range(at: 1), in: html) else { return nil }
         let title = String(html[range]).trimmingCharacters(in: .whitespacesAndNewlines)
         return title.isEmpty ? nil : title
