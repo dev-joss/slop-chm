@@ -84,19 +84,16 @@ struct SidebarView: View {
         let rows = visibleRows
         guard !rows.isEmpty else { return }
 
-        // Find current selection index
         if let currentIndex = rows.firstIndex(where: { $0.node.path != nil && $0.node.path == selectedPath }) {
-            // Move to previous row if possible
-            if currentIndex > 0 {
-                if let path = rows[currentIndex - 1].node.path {
+            // Scan backwards past path-less nodes
+            for i in stride(from: currentIndex - 1, through: 0, by: -1) {
+                if let path = rows[i].node.path {
                     selectedPath = path
+                    return
                 }
             }
         } else {
-            // No selection, select first item with a path
-            if let firstWithPath = rows.first(where: { $0.node.path != nil }) {
-                selectedPath = firstWithPath.node.path
-            }
+            selectedPath = rows.first(where: { $0.node.path != nil })?.node.path
         }
     }
 
@@ -104,19 +101,16 @@ struct SidebarView: View {
         let rows = visibleRows
         guard !rows.isEmpty else { return }
 
-        // Find current selection index
         if let currentIndex = rows.firstIndex(where: { $0.node.path != nil && $0.node.path == selectedPath }) {
-            // Move to next row if possible
-            if currentIndex < rows.count - 1 {
-                if let path = rows[currentIndex + 1].node.path {
+            // Scan forwards past path-less nodes
+            for i in (currentIndex + 1)..<rows.count {
+                if let path = rows[i].node.path {
                     selectedPath = path
+                    return
                 }
             }
         } else {
-            // No selection, select first item with a path
-            if let firstWithPath = rows.first(where: { $0.node.path != nil }) {
-                selectedPath = firstWithPath.node.path
-            }
+            selectedPath = rows.first(where: { $0.node.path != nil })?.node.path
         }
     }
 
