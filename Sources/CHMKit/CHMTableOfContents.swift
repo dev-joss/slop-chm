@@ -111,14 +111,15 @@ public enum TOCParser {
 
     private static func parseAttributes(_ tag: String) -> [String: String] {
         var attrs: [String: String] = [:]
-        let pattern = #"(\w+)\s*=\s*"([^"]*)""#
+        let pattern = #"(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)')"#
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return attrs }
         let nsTag = tag as NSString
         let matches = regex.matches(in: tag, range: NSRange(location: 0, length: nsTag.length))
         for match in matches {
             let key = nsTag.substring(with: match.range(at: 1)).lowercased()
-            let value = nsTag.substring(with: match.range(at: 2))
-            attrs[key] = value
+            let valueRange = match.range(at: 2).location != NSNotFound ? match.range(at: 2) : match.range(at: 3)
+            guard valueRange.location != NSNotFound else { continue }
+            attrs[key] = nsTag.substring(with: valueRange)
         }
         return attrs
     }
