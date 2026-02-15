@@ -14,6 +14,7 @@ struct ContentView: View {
         Group {
             if let vm = viewModel {
                 MainContentView(viewModel: vm)
+                    .focusedValue(\.viewModel, vm)
             } else if isLoading {
                 VStack(spacing: 16) {
                     ProgressView()

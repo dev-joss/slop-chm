@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 import CHMKit
 
 @MainActor @Observable
@@ -71,6 +72,47 @@ final class CHMViewModel {
             } catch {
                 // Index stays not-built; search will remain unavailable
             }
+        }
+    }
+
+    // MARK: - Export
+
+    func exportCurrentPage() {
+        guard let path = selectedPath else { return }
+        let data: Data
+        do {
+            data = try chmFile.extractData(path: path)
+        } catch {
+            return
+        }
+
+        let filename = (path as NSString).lastPathComponent
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = filename
+        panel.allowedContentTypes = [.html]
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        try? data.write(to: url)
+    }
+
+    func exportAll() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = true
+        panel.prompt = "Export"
+        guard panel.runModal() == .OK, let baseURL = panel.url else { return }
+
+        let entries = chmFile.enumerateEntries()
+        for entry in entries {
+            guard let data = try? chmFile.extractData(for: entry) else { continue }
+            // Strip leading "/" from entry path
+            let relativePath = entry.path.hasPrefix("/") ? String(entry.path.dropFirst()) : entry.path
+            guard !relativePath.isEmpty else { continue }
+            let destURL = baseURL.appendingPathComponent(relativePath)
+            let dir = destURL.deletingLastPathComponent()
+            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            try? data.write(to: destURL)
         }
     }
 

@@ -7,9 +7,21 @@ extension UTType {
     }
 }
 
+struct FocusedViewModelKey: FocusedValueKey {
+    typealias Value = CHMViewModel
+}
+
+extension FocusedValues {
+    var viewModel: CHMViewModel? {
+        get { self[FocusedViewModelKey.self] }
+        set { self[FocusedViewModelKey.self] = newValue }
+    }
+}
+
 @main
 struct CHMReaderApp: App {
     @State private var openedURL: URL?
+    @FocusedValue(\.viewModel) private var viewModel
 
     var body: some Scene {
         WindowGroup {
@@ -30,6 +42,20 @@ struct CHMReaderApp: App {
                     openFile()
                 }
                 .keyboardShortcut("o", modifiers: .command)
+
+                Divider()
+
+                Button("Export Page...") {
+                    viewModel?.exportCurrentPage()
+                }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
+                .disabled(viewModel?.selectedPath == nil)
+
+                Button("Export All...") {
+                    viewModel?.exportAll()
+                }
+                .keyboardShortcut("e", modifiers: [.command, .shift, .option])
+                .disabled(viewModel == nil)
             }
         }
     }
