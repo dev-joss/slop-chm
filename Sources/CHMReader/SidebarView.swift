@@ -32,6 +32,7 @@ struct SidebarView: View {
         }
         .focusable()
         .focused($isFocused)
+        .focusEffectDisabled()
         .onKeyPress(.upArrow) {
             navigateUp()
             return .handled
